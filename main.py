@@ -4,6 +4,9 @@ import requests
 # Retrieve the API key from the environment variable
 api_key = os.environ.get('API_KEY')
 
+# Print the API key for verification
+print(f"API Key: {api_key}")
+
 # Prompt the user for the desired city
 city = input("Enter the city name: ")
 
