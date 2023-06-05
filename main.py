@@ -4,9 +4,6 @@ import requests
 # Retrieve the API key from the environment variable
 api_key = os.environ.get('API_KEY')
 
-# Print the API key for verification
-# print(f"API Key: {api_key}")
-
 # Prompt the user for the desired location (city or ZIP code)
 location = input("Enter the city name or ZIP code: ")
 
@@ -30,12 +27,29 @@ if response.status_code == 200:
     temperature_celsius = data['main']['temp']
     temperature_fahrenheit = (temperature_celsius * 9/5) + 32
     humidity = data['main']['humidity']
-    wind_speed = data['wind']['speed']
+    air_pressure_hpa = data['main']['pressure']
+    air_pressure_inhg = air_pressure_hpa * 0.02953
+    rainfall_mm = data.get('rain', {}).get('1h', 0)
+    rainfall_in = rainfall_mm * 0.03937
+    wind_speed_mps = data['wind']['speed']
+    wind_speed_mph = wind_speed_mps * 2.23694
 
-    print(f"Weather in {location}:")
-    print(f"Weather Condition: {weather_condition}")
-    print(f"Temperature: {temperature_celsius}°C / {temperature_fahrenheit}°F")
+    print(f"\nHere is the weather in {location}!")
+    print(f"\nWeather Condition: {weather_condition}")
+    print(f"Temperature: {temperature_celsius:.2f}°C / {temperature_fahrenheit:.2f}°F")
     print(f"Humidity: {humidity}%")
-    print(f"Wind Speed: {wind_speed} m/s")
+    print(f"Air Pressure: {air_pressure_hpa:.2f} hPa / {air_pressure_inhg:.2f} inHg")
+    print(f"Rainfall (last 1 hour): {rainfall_mm:.2f} mm / {rainfall_in:.2f} in")
+    print(f"Wind Speed: {wind_speed_mps:.2f} m/s / {wind_speed_mph:.2f} mph")
+
+    # Calculate and display the temperature conversion steps
+    print("\nTemperature Conversion:")
+    print(f"{temperature_celsius:.2f}°C = ({temperature_celsius:.2f} × 9/5) + 32")
+    print(f"{temperature_celsius:.2f}°C = {temperature_fahrenheit:.2f}°F")
+
+    # Calculate and display the wind speed conversion steps
+    print("\nWind Speed Conversion:")
+    print(f"{wind_speed_mps:.2f} m/s = {wind_speed_mps:.2f} × 2.23694")
+    print(f"{wind_speed_mps:.2f} m/s = {wind_speed_mph:.2f} mph")
 else:
     print('Request failed with status code:', response.status_code)
