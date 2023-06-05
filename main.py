@@ -1,16 +1,15 @@
-import os  # Provides functions for interacting with the operating system, such as accessing environment variables.
-import requests  # Allows making HTTP requests to the weather API to retrieve weather data.
-import pytz  # Provides timezone information and allows converting between different timezones (MST).
-import datetime  # Provides classes and functions for working with dates and times.
-import csv  # Allows reading and writing CSV files, which is used to retrieve the list of climbing areas in Colorado.
-
+import os
+import requests
+import pytz
+import datetime
+import csv
 
 
 # Retrieve the API key from the environment variable
 api_key = os.environ.get('API_KEY')
 
 
-# Function to display the list of Colorado climbing areas
+# Function to display the list of Colorado climbing areas and retrieve the ZIP code
 def display_climbing_areas():
     with open('colorado_climbing_areas.csv', 'r') as file:
         reader = csv.reader(file)
@@ -29,7 +28,7 @@ def display_climbing_areas():
     try:
         index = int(choice) - 1
         if index >= 0 and index < len(climbing_areas):
-            return climbing_areas[index][0]
+            return climbing_areas[index][1]  # Return the ZIP code instead of the area name
         else:
             print("Invalid choice.")
             return display_climbing_areas()
@@ -42,7 +41,7 @@ def display_climbing_areas():
 location_option = input("Choose an option:\nA) List of Colorado Climbing Areas\nB) Enter City Name or ZIP code\n")
 
 if location_option.lower() == 'a':
-    # Display the list of Colorado climbing areas and get the chosen climbing area
+    # Display the list of Colorado climbing areas and get the chosen climbing area's ZIP code
     location = display_climbing_areas()
     if location is None:
         print("\nThank you for using the weather service. Have a great day!")
@@ -57,11 +56,18 @@ else:
 
 # Determine if the location is a ZIP code or city
 if location.isdigit():
-    # If the location is a ZIP code
+    # If the location is a ZIP code, no change is required
     url = f'https://api.openweathermap.org/data/2.5/weather?zip={location}&appid={api_key}&units=metric'
 else:
-    # If the location is a city name
-    url = f'https://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
+    # If the location is a city name, retrieve the ZIP code from the CSV file
+    with open('colorado_climbing_areas.csv', 'r') as file:
+        reader = csv.reader(file)
+        next(reader)  # Skip the header row
+        for row in reader:
+            if row[0].lower() == location.lower():
+                location = row[1]  # Use the ZIP code from the CSV file
+                break
+    url = f'https://api.openweathermap.org/data/2.5/weather?zip={location}&appid={api_key}&units=metric'
 
 
 # Send the GET request to the API
