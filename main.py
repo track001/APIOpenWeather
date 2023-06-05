@@ -5,13 +5,18 @@ import requests
 api_key = os.environ.get('API_KEY')
 
 # Print the API key for verification
-print(f"API Key: {api_key}")
+# print(f"API Key: {api_key}")
 
-# Prompt the user for the desired city
-city = input("Enter the city name: ")
+# Prompt the user for the desired location (city or ZIP code)
+location = input("Enter the city name or ZIP code: ")
 
-# Set up the API endpoint URL
-url = f'https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric'
+# Determine if the location is a ZIP code or city
+if location.isdigit():
+    # If the location is a ZIP code
+    url = f'https://api.openweathermap.org/data/2.5/weather?zip={location}&appid={api_key}&units=metric'
+else:
+    # If the location is a city name
+    url = f'https://api.openweathermap.org/data/2.5/weather?q={location}&appid={api_key}&units=metric'
 
 # Send the GET request to the API
 response = requests.get(url)
@@ -20,15 +25,16 @@ response = requests.get(url)
 if response.status_code == 200:
     data = response.json()
 
-    # Extract and display the weather information
+    # Extract and display weather information
     weather_condition = data['weather'][0]['main']
-    temperature = data['main']['temp']
+    temperature_celsius = data['main']['temp']
+    temperature_fahrenheit = (temperature_celsius * 9/5) + 32
     humidity = data['main']['humidity']
     wind_speed = data['wind']['speed']
 
-    print(f"Weather in {city}:")
+    print(f"Weather in {location}:")
     print(f"Weather Condition: {weather_condition}")
-    print(f"Temperature: {temperature}°C")
+    print(f"Temperature: {temperature_celsius}°C / {temperature_fahrenheit}°F")
     print(f"Humidity: {humidity}%")
     print(f"Wind Speed: {wind_speed} m/s")
 else:
