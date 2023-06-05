@@ -1,8 +1,9 @@
-import os
-import requests
-import pytz
-import datetime
-import csv
+import os  # Provides functions for interacting with the operating system, such as accessing environment variables.
+import requests  # Allows making HTTP requests to the weather API to retrieve weather data.
+import pytz  # Provides timezone information and allows converting between different timezones (MST).
+import datetime  # Provides classes and functions for working with dates and times.
+import csv  # Allows reading and writing CSV files, which is used to retrieve the list of climbing areas in Colorado.
+
 
 
 # Retrieve the API key from the environment variable
