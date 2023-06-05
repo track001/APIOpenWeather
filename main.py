@@ -88,6 +88,7 @@ if response.status_code == 200:
     humidity = data['main']['humidity']
     rainfall_mm = data.get('rain', {}).get('1h', 0)
     rainfall_inches = rainfall_mm * 0.03937
+    wind_speed = data['wind']['speed']
 
     print("\nCurrent Weather Conditions:")
     print(f"Location: {location}")
@@ -95,17 +96,40 @@ if response.status_code == 200:
     print(f"Temperature: {temperature_celsius:.2f} °C / {temperature_fahrenheit:.2f} °F")
     print(f"Humidity: {humidity}%")
     print(f"Rainfall: {rainfall_mm:.2f} mm / {rainfall_inches:.2f} in")
-    print(f"Sunrise: {sunrise_mst}")
-    print(f"Sunset: {sunset_mst}")
+    print(f"Wind Speed: {wind_speed} m/s")
+
+    # Prompt the user for the minimum and maximum temperature in Fahrenheit
+    min_temp_fahrenheit = float(input("\nEnter the minimum temperature (in Fahrenheit) for good climbing conditions: "))
+    max_temp_fahrenheit = float(input("Enter the maximum temperature (in Fahrenheit) for good climbing conditions: "))
+
+    # Define the climbing condition thresholds
+    min_temp_celsius = (min_temp_fahrenheit - 32) * 5 / 9
+    max_temp_celsius = (max_temp_fahrenheit - 32) * 5 / 9
+    min_humidity = 35
+    max_humidity = 60
+    max_wind_speed = 20
+
+    # Check if the climbing conditions are good
+    climbing_conditions = True
+
+    if temperature_celsius < min_temp_celsius or temperature_celsius > max_temp_celsius:
+        climbing_conditions = False
+
+    if humidity < min_humidity or humidity > max_humidity:
+        climbing_conditions = False
+
+    if wind_speed > max_wind_speed:
+        climbing_conditions = False
+
+    if climbing_conditions:
+        print("\nClimbing Conditions: Good")
+    else:
+        print("\nClimbing Conditions: Bad")
 
     choice = input("\nWould you like to see the weekly climbing conditions for the next 7 days? (yes/no): ")
 
     if choice.lower() == "yes" or choice.lower() == "y":
-        # Check if the climbing conditions are good
-        min_temp = 10  # Minimum temperature for climbing conditions (in Fahrenheit)
-        max_temp = 75  # Maximum temperature for climbing conditions (in Fahrenheit)
-
-        # Get the weekly forecast for climbing conditions
+        # Check if the climbing conditions are good for each day in the weekly forecast
         forecast_url = f'https://api.openweathermap.org/data/2.5/forecast?q={location}&appid={api_key}&units=metric'
         forecast_response = requests.get(forecast_url)
 
@@ -113,8 +137,8 @@ if response.status_code == 200:
             forecast_data = forecast_response.json()
             weekly_forecast = forecast_data['list']
             print("\nWeekly Climbing Forecast:")
-            print("\nDay | Weather | Temperature (°C) | Temperature (°F) | Climbing Conditions | Rainfall (mm) | Rainfall (in)")
-            print("----------------------------------------------------------------------------------------------")
+            print("\nDay | Weather | Temperature (°C) | Temperature (°F) | Humidity (%) | Wind Speed (m/s) | Climbing Conditions | Rainfall (mm) | Rainfall (in)")
+            print("------------------------------------------------------------------------------------------------------------------------")
             forecast_days = set()
             for forecast in weekly_forecast:
                 forecast_time = datetime.datetime.strptime(forecast['dt_txt'], '%Y-%m-%d %H:%M:%S')
@@ -125,10 +149,12 @@ if response.status_code == 200:
                     forecast_description = forecast['weather'][0]['description']
                     forecast_temperature = forecast['main']['temp']
                     forecast_temperature_fahrenheit = (forecast_temperature * 9 / 5) + 32
+                    forecast_humidity = forecast['main']['humidity']
+                    forecast_wind_speed = forecast['wind']['speed']
                     forecast_rainfall_mm = forecast.get('rain', {}).get('3h', 0)
                     forecast_rainfall_inches = forecast_rainfall_mm * 0.03937
-                    forecast_climbing_conditions = "Good" if min_temp <= forecast_temperature_fahrenheit <= max_temp else "Bad"
-                    print(f"{forecast_day} | {forecast_description} | {forecast_temperature:.2f} | {forecast_temperature_fahrenheit:.2f} | {forecast_climbing_conditions} | {forecast_rainfall_mm:.2f} | {forecast_rainfall_inches:.2f}")
+                    forecast_climbing_conditions = "Good" if min_temp_celsius <= forecast_temperature <= max_temp_celsius and min_humidity <= forecast_humidity <= max_humidity and forecast_wind_speed <= max_wind_speed else "Bad"
+                    print(f"{forecast_day} | {forecast_description} | {forecast_temperature:.2f} | {forecast_temperature_fahrenheit:.2f} | {forecast_humidity} | {forecast_wind_speed} | {forecast_climbing_conditions} | {forecast_rainfall_mm:.2f} | {forecast_rainfall_inches:.2f}")
         else:
             print('Failed to retrieve weekly forecast:', forecast_response.status_code)
 
