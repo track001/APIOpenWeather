@@ -8,7 +8,7 @@ import csv  # For working with CSV files
 api_key = os.environ.get('API_KEY')
 
 print("**************************************")
-print("*    Welcome to the Climbing Forecast Program    *")
+print("*    Welcome to the Climbing Forecast Program!    *")
 print("**************************************")
 
 print(
@@ -88,8 +88,6 @@ else:
         break
   url = f'https://api.openweathermap.org/data/2.5/weather?zip={location}&appid={api_key}&units=metric'
 
-# Rest of the code...
-
 # Determine if the location is a ZIP code or city
 if location.isdigit():
   # If the location is a ZIP code, no change is required
@@ -135,12 +133,31 @@ if response.status_code == 200:
   rainfall_mm = data.get('rain', {}).get('1h', 0)
   rainfall_in = rainfall_mm / 25.4
 
+  # Extract high and low temperatures
+  temperature_max_celsius = data['main']['temp_max']
+  temperature_min_celsius = data['main']['temp_min']
+
+  # Convert temperatures to Fahrenheit
+  temperature_max_fahrenheit = (temperature_max_celsius * 9 / 5) + 32
+  temperature_min_fahrenheit = (temperature_min_celsius * 9 / 5) + 32
+
+  # Calculate "feels like" temperature using wind chill formula
+  wind_speed_kmph = data['wind']['speed'] * 3.6  # Convert m/s to km/h
+  feels_like_fahrenheit = 35.74 + 0.6215 * temperature_fahrenheit - 35.75 * wind_speed_kmph**0.16 + 0.4275 * temperature_fahrenheit * wind_speed_kmph**0.16
+
   print("\nCurrent Weather Conditions:")
   print(f"Location: {location}")
   print(f"Weather: {weather_condition} ({weather_description})")
   print(
     f"Temperature: {temperature_celsius:.2f} °C / {temperature_fahrenheit:.2f} °F"
   )
+  print(
+    f"High Temperature: {temperature_max_celsius:.2f} °C / {temperature_max_fahrenheit:.2f} °F"
+  )
+  print(
+    f"Low Temperature: {temperature_min_celsius:.2f} °C / {temperature_min_fahrenheit:.2f} °F"
+  )
+  print(f"Feels Like: {feels_like_fahrenheit:.2f} °F")
   print(f"Humidity: {humidity}%")
   print(f"Wind Speed: {wind_speed:.2f} mph")
   print(f"Rainfall: {rainfall_mm:.2f} mm / {rainfall_in:.2f} in")
