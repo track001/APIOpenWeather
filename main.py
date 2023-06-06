@@ -21,7 +21,7 @@ def display_climbing_areas():
 
   print("List of Colorado Climbing Areas:")
   for i, area in enumerate(climbing_areas):
-    print(f"{i+1}. {area[0]}")
+    print(f"{i + 1}. {area[0]}")
 
   choice = input(
     "\nEnter the number corresponding to the climbing area you want to check the forecast for (or enter 'Q' to quit): "
@@ -45,7 +45,7 @@ def display_climbing_areas():
 
 # Prompt the user for the desired location option
 location_option = input(
-  "Choose an option:\nA) List of Colorado Climbing Areas\nB) Enter City Name or ZIP code\n"
+  "Choose an option:\nA) List of Colorado Climbing Areas\nB) Enter City Name or ZIP code\nC) Enter Longitude and Latitude\n"
 )
 
 if location_option.lower() == 'a':
@@ -57,6 +57,11 @@ if location_option.lower() == 'a':
 elif location_option.lower() == 'b':
   # Prompt the user to enter the city name or ZIP code
   location = input("Enter the city name or ZIP code: ")
+elif location_option.lower() == 'c':
+  # Prompt the user to enter the latitude and longitude
+  latitude = input("Enter the latitude: ")
+  longitude = input("Enter the longitude: ")
+  location = latitude + "," + longitude
 else:
   print("Invalid option. Exiting...")
   exit()
@@ -65,6 +70,26 @@ else:
 if location.isdigit():
   # If the location is a ZIP code, no change is required
   url = f'https://api.openweathermap.org/data/2.5/weather?zip={location}&appid={api_key}&units=metric'
+else:
+  # If the location is a city name, retrieve the ZIP code from the CSV file
+  with open('colorado_climbing_areas.csv', 'r') as file:
+    reader = csv.reader(file)
+    next(reader)  # Skip the header row
+    for row in reader:
+      if row[0].lower() == location.lower():
+        location = row[1]  # Use the ZIP code from the CSV file
+        break
+  url = f'https://api.openweathermap.org/data/2.5/weather?zip={location}&appid={api_key}&units=metric'
+
+# Rest of the code...
+
+# Determine if the location is a ZIP code or city
+if location.isdigit():
+  # If the location is a ZIP code, no change is required
+  url = f'https://api.openweathermap.org/data/2.5/weather?zip={location}&appid={api_key}&units=metric'
+elif location_option.lower() == 'c':
+  # If the location option is longitude and latitude
+  url = f'https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={api_key}&units=metric'
 else:
   # If the location is a city name, retrieve the ZIP code from the CSV file
   with open('colorado_climbing_areas.csv', 'r') as file:
