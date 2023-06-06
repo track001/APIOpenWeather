@@ -33,14 +33,12 @@ Get weather conditions for a specific location:
 <br>The program will output the weekly forecast, including weather conditions, temperatures, humidity, wind speed, rainfall, and climbing conditions.
 
 **Dependencies**
-<br>-Python 3.x
-<br>requests (2.x.x) - for making HTTP requests
-<br>-pytz (2.x.x) - for timezone conversion
+<br>*-Python 3.x* requests (2.x.x) for making HTTP requests.
+<br>-*pytz (2.x.x)* - for timezone conversion.
 <br>To install the required dependencies, use the following command:
 <br>```pip install requests pytz```
-<br>-API Key
-<br>To use the OpenWeather API and fetch weather data, you need to provide an API key. Instructions for obtaining an API key can be found on the OpenWeather website.
-<br>Link: https://openweathermap.org/appid
+<br>*-API Key*
+<br>To use the OpenWeather API and fetch weather data, you need to provide an API key. Instructions for obtaining an API key can be found on the OpenWeather website: https://openweathermap.org/appid.
 
 <br>Once you have obtained your API key, replace the placeholder YOUR_API_KEY in the code with your actual API key:
 <br>```API_KEY = "YOUR_API_KEY"```
