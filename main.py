@@ -1,8 +1,8 @@
-import os
-import requests
-import pytz
-import datetime
-import csv
+import os  # For file operations
+import requests  # For making HTTP requests
+import pytz  # For timezone conversion
+import datetime  # For date and time manipulation
+import csv  # For working with CSV files
 
 # Retrieve the API key from the environment variable
 api_key = os.environ.get('API_KEY')
@@ -10,6 +10,10 @@ api_key = os.environ.get('API_KEY')
 print("**************************************")
 print("*    Welcome to the Climbing Forecast Program    *")
 print("**************************************")
+
+print(
+  "Choose from a list of Colorado Climbing areas, \nenter the city name or zip code (anywhere in the world), \nor enter the exact coordinates to your bouldering problem/sport climb."
+)
 
 
 # Function to display the list of Colorado climbing areas and retrieve the ZIP code
@@ -45,7 +49,7 @@ def display_climbing_areas():
 
 # Prompt the user for the desired location option
 location_option = input(
-  "Choose an option:\nA) List of Colorado Climbing Areas\nB) Enter City Name or ZIP code\nC) Enter Longitude and Latitude\n"
+  "\n\nChoose an option:\nA) List of Colorado Climbing Areas\nB) Enter City Name or ZIP code\nC) Enter Longitude and Latitude\n"
 )
 
 if location_option.lower() == 'a':
@@ -70,6 +74,9 @@ else:
 if location.isdigit():
   # If the location is a ZIP code, no change is required
   url = f'https://api.openweathermap.org/data/2.5/weather?zip={location}&appid={api_key}&units=metric'
+elif location_option.lower() == 'c':
+  # If the location option is longitude and latitude
+  url = f'https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={api_key}&units=metric'
 else:
   # If the location is a city name, retrieve the ZIP code from the CSV file
   with open('colorado_climbing_areas.csv', 'r') as file:
@@ -235,12 +242,92 @@ if response.status_code == 200:
             forecast_climbing_conditions = "Bad"
 
           print(
-            f"{forecast_day:<9} | {forecast_weather_condition:<7} | {forecast_temperature_celsius:<16.2f} | {forecast_temperature_fahrenheit:<16.2f} | {forecast_humidity:<13} | {forecast_wind_speed:<16.2f} | {forecast_climbing_conditions:<19} | {forecast_rainfall_mm:<14.2f} | {forecast_rainfall_in:<14.2f}"
+            f"{forecast_day:<10} | {forecast_weather_condition:<7} | {forecast_temperature_celsius:<15.2f} | {forecast_temperature_fahrenheit:<15.2f} | {forecast_humidity:<13} | {forecast_wind_speed:<16.2f} | {forecast_climbing_conditions:<18} | {forecast_rainfall_mm:<14.2f} | {forecast_rainfall_in:<14.2f}"
           )
     else:
       print("Failed to retrieve the weekly forecast.")
-
   else:
-    print("\nThanks for using the weather service. Have a great day!")
+    print("\nThank you for using the weather service. Have a great day!")
+
+  # Save the output to a file
+  filename = input("\nEnter the filename to save the output: ")
+  with open(filename, 'w') as file:
+    file.write("\nCurrent Weather Conditions:\n")
+    file.write(f"Location: {location}\n")
+    file.write(f"Weather: {weather_condition} ({weather_description})\n")
+    file.write(
+      f"Temperature: {temperature_celsius:.2f} °C / {temperature_fahrenheit:.2f} °F\n"
+    )
+    file.write(f"Humidity: {humidity}%\n")
+    file.write(f"Wind Speed: {wind_speed:.2f} mph\n")
+    file.write(f"Rainfall: {rainfall_mm:.2f} mm / {rainfall_in:.2f} in\n")
+    file.write(f"Sunrise: {sunrise_mst}\n")
+    file.write(f"Sunset: {sunset_mst}\n\n")
+    file.write("Your ideal climbing conditions are related to temperature")
+    file.write(f" ({min_temp_fahrenheit}°F & {max_temp_fahrenheit}°F),")
+    file.write(
+      " humidity should be between 35-60%, and wind should be less than 20 mph.\n"
+    )
+    file.write(f"Climbing Conditions: {climbing_conditions}\n")
+
+    if climbing_conditions == "Bad":
+      file.write("\nHere is what is making the conditions bad:\n")
+      if temperature_fahrenheit < min_temp_fahrenheit:
+        file.write(
+          f"Temperature ({temperature_fahrenheit}°F) is below the minimum threshold.\n"
+        )
+      elif temperature_fahrenheit > max_temp_fahrenheit:
+        file.write(
+          f"Temperature ({temperature_fahrenheit}°F) is above the maximum threshold.\n"
+        )
+      if humidity < 35 or humidity > 60:
+        file.write(f"Humidity ({humidity}%) is outside the ideal range.\n")
+      if wind_speed > 20:
+        file.write(
+          f"Wind speed ({wind_speed} mph) exceeds the maximum limit.\n")
+
+    file.write("\nWeekly Climbing Forecast:\n")
+    file.write(
+      "\nDay       | Weather | Temperature (°C) | Temperature (°F) | Humidity (%) | Wind Speed (mph) | Climbing Conditions | Rainfall (mm) | Rainfall (in)\n"
+    )
+    file.write(
+      "------------------------------------------------------------------------------------------------------------------------\n"
+    )
+
+    forecast_days = set()
+    for forecast in weekly_forecast:
+      forecast_time = datetime.datetime.strptime(forecast['dt_txt'],
+                                                 '%Y-%m-%d %H:%M:%S')
+      forecast_day = forecast_time.strftime('%A')
+      if forecast_day not in forecast_days:
+        forecast_days.add(forecast_day)
+        forecast_weather_condition = forecast['weather'][0]['main']
+        forecast_weather_description = forecast['weather'][0]['description']
+        forecast_temperature_celsius = forecast['main']['temp']
+        forecast_temperature_fahrenheit = (forecast_temperature_celsius * 9 /
+                                           5) + 32
+        forecast_humidity = forecast['main']['humidity']
+        forecast_wind_speed = forecast['wind'][
+          'speed'] * 2.237  # Convert m/s to mph
+        forecast_rainfall_mm = forecast.get('rain', {}).get('3h', 0)
+        forecast_rainfall_in = forecast_rainfall_mm / 25.4
+
+        forecast_climbing_conditions = "Good"
+
+        if not (min_temp_celsius <= forecast_temperature_celsius <=
+                max_temp_celsius):
+          forecast_climbing_conditions = "Bad"
+
+        if not (35 <= forecast_humidity <= 60):
+          forecast_climbing_conditions = "Bad"
+
+        if forecast_wind_speed > 20:
+          forecast_climbing_conditions = "Bad"
+
+        file.write(
+          f"{forecast_day:<10} | {forecast_weather_condition:<7} | {forecast_temperature_celsius:<15.2f} | {forecast_temperature_fahrenheit:<15.2f} | {forecast_humidity:<13} | {forecast_wind_speed:<16.2f} | {forecast_climbing_conditions:<18} | {forecast_rainfall_mm:<14.2f} | {forecast_rainfall_in:<14.2f}\n"
+        )
+    file.close()
+
 else:
-  print("Failed to retrieve weather data. Please try again later.")
+  print("Failed to retrieve weather information. Please try again later.")
