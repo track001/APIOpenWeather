@@ -9,7 +9,7 @@
 <br> **Features** </br>
 Get weather conditions for a specific location:
 <br>A) Choose from a list of pre-existing Colorado climbing areas.
-<br>B) Enter a city name or ZIP code.
+<br>B) Enter a city name or ZIP code (must exist in Colorado).
 <br>C) Enter coordinates (latitude and longitude).
 
 <br> *Convert weather data to user-friendly units:* </br>
