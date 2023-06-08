@@ -1,4 +1,4 @@
-<h1>Climbing Forecast Program</h1>
+<h1>CragWeather GUI Application</h1>
 
 <br>**Data Sources for Colorado Climbing Areas and Weather Forecasts**
 <br>This program utilizes multiple data sources to provide accurate weather forecasts for various climbing areas in Colorado:
